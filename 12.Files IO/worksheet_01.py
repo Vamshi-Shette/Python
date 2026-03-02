@@ -289,54 +289,6 @@ Timeout occurred
 ✔ Only ERROR messages are extracted.
 ✔ INFO and WARNING entries are excluded.
 """
-'''
-7. Data Structures: Lists, Dictionaries, and Sets
-• Concepts: Efficient use of lists, dictionaries, tuples, and sets to store and manipulate data.
-• Task:
-• Given a list of log lines, group them by severity (e.g., INFO, WARNING, ERROR)
-using a dictionary.
-• Validation: Verify that the dictionary keys and counts correctly reflect the
-distribution of log entries. 
-'''
-
-import os,sys
-filename=input("Enter file name:")
-if not os.path.exists(filename):
-    print("File not exist:")
-    sys.exit()
-count={}
-with open(filename,'r') as fp:
-    for line in fp:
-        if 'ERROR' in line:
-            count['ERROR']=count.get('ERROR',0)+1
-        elif 'INFO' in line:
-            count['INFO']=count.get('INFO',0)+1
-        elif 'WARN' in line:
-            count['WARN']=count.get('WARN',0)+1
-for key,value in count.items():
-    print(f"{key}:{value}")
-
-'''
-8. List and Dictionary Comprehensions
-• Concepts: Using comprehensions for concise and efficient data transformations.
-• Task:
-• Write a script that filters out and transforms a list of log entries using list
-comprehensions (for instance, extracting only error messages).
-• Validation: Confirm that the resultant list contains only the expected entries.
-'''
-
-import os,sys
-filename=input("Enter file name:")
-msg=input("enter msg to filter lines:")
-
-if not os.path.exists(filename):
-    print("File not exist:")
-    sys.exit()
-with open(filename,'r') as file:
-    lines=file.readlines()
-    filtered=[l for l in lines if msg in l]
-    for l in filtered:
-        print(l)
 
 #................................................................
 """
@@ -441,4 +393,168 @@ try:
 except FileNotFoundError:
     print("Log file not found. Please check the file name.")
     
+"""
+Task 4: Modular Code Development
+Covers: Functions, modular programming, and data structures
+Description: Refactor the log parser into reusable functions, and group log entries by severity using dictionaries.
+"""
+
+# ----------------------------
+# Function 1: Parse a single log line
+# ----------------------------
+def parse_log_line(line):
+    """
+    Parses a log line into a dictionary.
+    Expected format:
+    2026-02-27 10:15:32 - ERROR - Database connection failed
+    """
+    try:
+        parts = line.strip().split(" - ")
+        if len(parts) != 3:
+            return None  # Skip malformed lines
+        
+        return {
+            "timestamp": parts[0],
+            "severity": parts[1],
+            "message": parts[2]
+        }
+    except Exception:
+        return None
+
+
+# ----------------------------
+# Function 2: Read and parse file
+# ----------------------------
+def read_log_file(filename):
+    logs = []
+    try:
+        with open(filename, "r") as file:
+            for line in file:
+                parsed = parse_log_line(line)
+                if parsed:
+                    logs.append(parsed)
+    except FileNotFoundError:
+        print("File not found.")
+    return logs
+
+
+# ----------------------------
+# Function 3: Group by severity
+# ----------------------------
+def group_by_severity(logs):
+    severity_count = {}
+    
+    for log in logs:
+        level = log["severity"]
+        severity_count[level] = severity_count.get(level, 0) + 1
+    
+    return severity_count
+
+
+# ----------------------------
+# Main Execution
+# ----------------------------
+if __name__ == "__main__":
+    filename = "sample_log.txt"   # Replace with your log file
+    
+    logs = read_log_file(filename)
+    result = group_by_severity(logs)
+    
+    print("Log Count by Severity:")
+    print(result)
+
+"""
+Task 5: Command-Line Tool
+Covers: Command-line argument parsing and list comprehensions
+Description: Create a script that accepts file names and search terms from the command line,
+processes logs, and outputs filtered results.
+"""
+
+import sys
+
+def filter_logs(filename, keyword):
+    try:
+        with open(filename, "r") as file:
+            lines = file.readlines()
+        
+        # Using list comprehension to filter
+        filtered = [line.strip() for line in lines if keyword in line]
+        
+        return filtered
+    
+    except FileNotFoundError:
+        print("File not found.")
+        return []
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python script.py <filename> <search_term>")
+    else:
+        filename = sys.argv[1]
+        keyword = sys.argv[2]
+        
+        results = filter_logs(filename, keyword)
+        
+        print("\nFiltered Results:")
+        for line in results:
+            print(line)
+
+"""
+Task 7: CSV Data Analyzer
+
+Concepts:
+- File I/O
+- Lists and Dictionaries
+- List Comprehensions
+- Basic Data Analysis
+
+Description:
+Develop a script that reads a CSV file containing columns such as 
+"TestCase," "Status," and "ExecutionTime."
+The script should produce a summary report showing counts for each 
+status (e.g., Passed, Failed) and compute the average execution time.
+
+Validation:
+Use a sample CSV file and compare the output summary with expected statistics.
+"""
+
+import csv
+
+def analyze_csv(file_name):
+    status_count = {}
+    execution_times = []
+
+    try:
+        with open(file_name, 'r') as file:
+            reader = csv.DictReader(file)
+
+            for row in reader:
+                status = row["Status"]
+                time = float(row["ExecutionTime"])
+
+                # Count status
+                if status in status_count:
+                    status_count[status] += 1
+                else:
+                    status_count[status] = 1
+
+                execution_times.append(time)
+
+        # Calculate average execution time
+        if execution_times:
+            avg_time = sum(execution_times) / len(execution_times)
+        else:
+            avg_time = 0
+
+        print("Status Summary:")
+        print(status_count)
+        print("Average Execution Time:", round(avg_time, 2))
+
+    except FileNotFoundError:
+        print("File not found. Please check the file name.")
+
+# Example usage
+file_name = input("Enter CSV file name: ")
+analyze_csv(file_name)
             

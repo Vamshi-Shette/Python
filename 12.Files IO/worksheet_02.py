@@ -254,4 +254,108 @@ def convert_to_json(input_file,output_file):
 if __name__=="__main__":
     convert_to_json("log.txt","output.json")
     
+'''
+Command-Line Log Filter
+
+Task:
+Develop a command-line tool using Python’s argparse module that accepts two
+arguments: a log level (e.g., "ERROR") and a module name. The script should
+filter the log file to print only those entries matching both criteria.
+
+Challenge:
+Validate the command-line inputs and provide helpful error messages for
+invalid or missing arguments.
+
+Example usage in terminal:
+python log_filter.py server_logs.log ERROR auth
+'''
+
+import argparse
+
+# Create argument parser
+parser = argparse.ArgumentParser(description="Filter log entries by log level and module name")
+
+# Add command line arguments
+parser.add_argument("filename", help="Log file name")
+parser.add_argument("level", help="Log level (INFO, DEBUG, WARNING, ERROR)")
+parser.add_argument("module", help="Module name")
+
+args = parser.parse_args()
+
+# Valid log levels
+valid_levels = ["INFO", "DEBUG", "WARNING", "ERROR"]
+
+# Validate log level
+if args.level.upper() not in valid_levels:
+    print("Invalid log level. Please use INFO, DEBUG, WARNING, or ERROR")
+    exit()
+
+try:
+    with open(args.filename, "r") as file:
+        for line in file:
+            parts = line.strip().split(" - ")
+
+            # Check if line has expected format
+            if len(parts) < 4:
+                continue
+
+            timestamp = parts[0]
+            log_level = parts[1]
+            module = parts[2]
+            message = parts[3]
+
+            # Filter by level and module
+            if log_level == args.level.upper() and module == args.module:
+                print(line.strip())
+
+except FileNotFoundError:
+    print("Error: Log file not found. Please check the file name.")
+
+'''
+Regular Expression Challenge (IP Address Extractor)
+
+Task:
+Write a Python function that uses a regular expression to extract all unique IPv4 addresses
+from a log file. Some log messages include IP addresses (for example:
+"Ping to server 192.168.1.100 succeeded").
+
+The function should return a list of unique IP addresses found in the file.
+
+Challenge:
+Ensure the regex correctly matches valid IPv4 formats and avoids invalid patterns.
+
+Example Log Line:
+2026-03-10 10:15:32 - INFO - network - Ping to server 192.168.1.100 succeeded
+'''
+
+import re
+
+filename = input("Enter log file name: ")
+
+# Regular expression for valid IPv4 addresses
+pattern = r'\b((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\b'
+
+unique_ips = set()
+
+try:
+    with open(filename, "r") as file:
+        for line in file:
+            matches = re.findall(pattern, line)
+
+            for match in matches:
+                # match[0] contains the full IP portion except last number
+                # so we search again for full IP in the line
+                full_ips = re.findall(r'\b\d{1,3}(?:\.\d{1,3}){3}\b', line)
+
+                for ip in full_ips:
+                    parts = ip.split('.')
+                    if all(0 <= int(p) <= 255 for p in parts):
+                        unique_ips.add(ip)
+
+    print("Unique IPv4 addresses found:")
+    print(list(unique_ips))
+
+except FileNotFoundError:
+    print("Error: File not found.")
+    
         

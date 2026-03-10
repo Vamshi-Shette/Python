@@ -132,9 +132,7 @@ Test the functions independently to ensure they work correctly
 with predefined inputs.
 """
 
-# -------------------------------
 # Module-like Functions Section
-# -------------------------------
 
 def parse_log_line(line):
     """
@@ -177,9 +175,7 @@ def parse_log_file(filename):
     return parsed_logs
 
 
-# -------------------------------
 # Validation Section (Testing)
-# -------------------------------
 
 # Test 1: Independent function test
 print("Testing parse_log_line function:")
@@ -422,9 +418,8 @@ def parse_log_line(line):
         return None
 
 
-# ----------------------------
 # Function 2: Read and parse file
-# ----------------------------
+
 def read_log_file(filename):
     logs = []
     try:
@@ -438,9 +433,8 @@ def read_log_file(filename):
     return logs
 
 
-# ----------------------------
 # Function 3: Group by severity
-# ----------------------------
+
 def group_by_severity(logs):
     severity_count = {}
     
@@ -451,9 +445,7 @@ def group_by_severity(logs):
     return severity_count
 
 
-# ----------------------------
 # Main Execution
-# ----------------------------
 if __name__ == "__main__":
     filename = "sample_log.txt"   # Replace with your log file
     
@@ -557,4 +549,69 @@ def analyze_csv(file_name):
 # Example usage
 file_name = input("Enter CSV file name: ")
 analyze_csv(file_name)
-            
+
+'''
+Task 8: JSON Configuration Updater
+
+Concepts:
+File I/O, JSON processing, dictionary manipulation, and exception handling.
+
+Description:
+Create a script that loads a JSON configuration file, updates specific keys
+based on given conditions (for example, updating a version number or toggling
+a feature flag), and writes the modified configuration back to disk.
+
+Validation:
+Test the script with a sample JSON file and ensure only the intended keys
+are modified while the rest of the configuration remains intact.
+
+Example JSON file (config.json):
+
+{
+    "app_name": "MyApplication",
+    "version": "1.0",
+    "feature_enabled": false,
+    "max_users": 100
+}
+'''
+
+import json
+
+filename = input("Enter JSON file name: ")
+
+try:
+    # Read JSON file
+    with open(filename, "r") as file:
+        config = json.load(file)
+
+    print("Original Configuration:")
+    print(config)
+
+    # Update version number
+    if "version" in config:
+        new_version = input("Enter new version (or press Enter to skip): ")
+        if new_version:
+            config["version"] = new_version
+
+    # Toggle feature flag
+    if "feature_enabled" in config:
+        toggle = input("Toggle feature_enabled? (yes/no): ").lower()
+        if toggle == "yes":
+            config["feature_enabled"] = not config["feature_enabled"]
+
+    # Write updated JSON back to file
+    with open(filename, "w") as file:
+        json.dump(config, file, indent=4)
+
+    print("Updated Configuration:")
+    print(config)
+
+except FileNotFoundError:
+    print("Error: JSON file not found.")
+
+except json.JSONDecodeError:
+    print("Error: Invalid JSON format in file.")
+
+except Exception as e:
+    print("Unexpected error:", e)
+
